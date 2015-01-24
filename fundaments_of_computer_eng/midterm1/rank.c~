@@ -1,0 +1,13 @@
+#include <iostream>
+#include <vector>
+
+using namespace std;
+
+int main(int argc, char* argv[]){
+
+  
+
+  vector<u_int> rank_test(n);
+
+  return 0;
+}

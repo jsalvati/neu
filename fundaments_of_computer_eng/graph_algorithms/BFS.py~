@@ -1,0 +1,23 @@
+import graph
+from queue import queue
+from vertex import vertex
+
+
+
+def BFS (G, S):
+  S.color = "Gray"
+  S.d = 0
+  S.pi = None
+  Q = Queue()
+  Q.enqueue(S)
+  while (!Q.isEmpty):
+    u = dequeue(Q)
+    for v in v.getConnections():
+      if (v.color == "White"):
+        v.color = "Gray"
+        v.d = u.d+1
+        v.pi = u
+        Q.enqueue(v)
+    u.color = "Black"
+
+

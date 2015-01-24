@@ -1,0 +1,10 @@
+directed
+a,b,c,d,e,f,g,h,
+a>b, 
+b>g,
+c>d,
+d>c,g,
+e>f,
+f>e,g,
+g
+h>a,c,e,
