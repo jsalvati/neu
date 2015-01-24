@@ -19,6 +19,18 @@ Pacman agents (in searchAgents.py).
 
 import util
 
+
+class Node:
+    
+    def __init__(self, state, parent, children):
+        self.state  = state
+        self.parent = parent
+        self.children = children
+        self.action = None
+        self.cost = 0
+
+
+
 class SearchProblem:
     """
     This class outlines the structure of a search problem, but doesn't implement
@@ -74,14 +86,6 @@ def tinyMazeSearch(problem):
 
 
 
-class Node:
-    
-    def __init__(self, state):
-        self.state  = state
-        self.parent = None
-        self.children = []
-
-
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
@@ -90,16 +94,10 @@ def depthFirstSearch(problem):
     goal. Make sure to implement a graph search algorithm.
     """
 
-    
     frontier = util.Stack()
     explored = []
     actions = []
-
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    
-    node = Node(problem.getStartState())
+    node = Node(problem.getStartState(), None, [])
     frontier.push(node)
     
     while 1:
@@ -112,10 +110,11 @@ def depthFirstSearch(problem):
             state,action,cost = childNode
 
             if (not state in explored):
-                child = Node(state)
-                child.parent = node
+                child = Node(state,node,[])
                 child.action = action
                 child.cost = cost
+
+                node.children.append(child)
 
                 if problem.isGoalState(state):
                     actions = solution(problem, child)
@@ -124,19 +123,6 @@ def depthFirstSearch(problem):
                 else:
                     frontier.push(child)
                     
-    
-def solution(problem, node):
-    """ 
-    starting with a solution node, keep adding the action to the end of the actions list
-    until we reach the start state of the problem
-    """
- 
-    actions = []
-    while (node.state != problem.getStartState()):
-        actions = [node.action] + actions 
-        node = node.parent
-
-    return actions
     
 
 def breadthFirstSearch(problem):
@@ -161,6 +147,20 @@ def aStarSearch(problem, heuristic=nullHeuristic):
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
+
+
+def solution(problem, node):
+    """ 
+    starting with a solution node, keep adding the action to the end of the actions list
+    until we reach the start state of the problem
+    """
+ 
+    actions = []
+    while (node.state != problem.getStartState()):
+        actions = [node.action] + actions 
+        node = node.parent
+
+    return actions
 
 # Abbreviations
 bfs = breadthFirstSearch
