@@ -72,22 +72,72 @@ def tinyMazeSearch(problem):
     w = Directions.WEST
     return  [s, s, w, s, w, w, s, w]
 
+
+
+class Node:
+    
+    def __init__(self, state):
+        self.state  = state
+        self.parent = None
+        self.children = []
+
+
 def depthFirstSearch(problem):
     """
     Search the deepest nodes in the search tree first.
 
     Your search algorithm needs to return a list of actions that reaches the
     goal. Make sure to implement a graph search algorithm.
+    """
 
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
+    
+    frontier = util.Stack()
+    explored = []
+    actions = []
 
     print "Start:", problem.getStartState()
     print "Is the start a goal?", problem.isGoalState(problem.getStartState())
     print "Start's successors:", problem.getSuccessors(problem.getStartState())
+    
+    node = Node(problem.getStartState())
+    frontier.push(node)
+    
+    while 1:
+        if frontier.isEmpty():
+            return actions
+        node = frontier.pop()
+        explored.append(node.state)
+        for childNode in problem.getSuccessors(node.state):
+            
+            state,action,cost = childNode
+
+            if (not state in explored):
+                child = Node(state)
+                child.parent = node
+                child.action = action
+                child.cost = cost
+
+                if problem.isGoalState(state):
+                    actions = solution(problem, child)
+                    print "Found goal!!! :",actions
+                    return actions
+                else:
+                    frontier.push(child)
+                    
+    
+def solution(problem, node):
+    """ 
+    starting with a solution node, keep adding the action to the end of the actions list
+    until we reach the start state of the problem
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+ 
+    actions = []
+    while (node.state != problem.getStartState()):
+        actions = [node.action] + actions 
+        node = node.parent
+
+    return actions
+    
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
