@@ -129,17 +129,34 @@ def depthFirstSearch(problem):
                 frindgeStates.append(child.state)
 
 
+def isChildInFrontier (child, frontier):
+    for node in frontier:
+        if child.state == node.state:
+            return True
+    return False
+
+def isChildInFrontierHeap (child, frontier):
+    for something,cost,node in frontier:
+        if child.state == node.state:
+            return True
+    return False
+
+def findChildInFrontier (child, frontier):
+    for something,cost,node in frontier:
+        if child.state == node.state:
+            return node
+    return -1
+
+
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
 
 
     frontier = util.Queue()
-    frindgeStates = []
     explored = []
     actions = []
     node = Node(problem.getStartState(), None, [])
     frontier.push(node)
-    frindgeStates.append(node.state)
     
     while 1:
         if frontier.isEmpty():
@@ -157,48 +174,57 @@ def breadthFirstSearch(problem):
         for childNode in problem.getSuccessors(node.state):
             
             state,action,cost = childNode
+            child = Node(state,node,[])
+            child.action = action
+            child.cost = cost
 
-            if ( (not state in explored) and (not state in frindgeStates)):
-                child = Node(state,node,[])
-                child.action = action
-                child.cost = cost
-
+            if ( (not state in explored) and (not isChildInFrontier(child, frontier.list))):
                 node.children.append(child)
                 frontier.push(child)
-                frindgeStates.append(child.state)
                     
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
 
     frontier = util.PriorityQueue()
+
     explored = []
     actions = []
     node = Node(problem.getStartState(), None, [])
-    frontier.push(node, 0)
+    frontier.push(node,0)
     
     while 1:
         if frontier.isEmpty():
             return actions
+            
         node = frontier.pop()
+
+        if(problem.isGoalState(node.state)):
+            actions = solution(problem, node)
+            return actions
+
         explored.append(node.state)
         for childNode in problem.getSuccessors(node.state):
             
             state,action,cost = childNode
+            
+            child = Node(state,node,[])
+            child.action = action
+            child.cost = node.cost + cost
 
-            if (not state in explored):
-                child = Node(state,node,[])
-                child.action = action
-                child.cost = cost
+            existingChild = findChildInFrontier(child, frontier.heap)
 
+            if ( (not state in explored) and (existingChild == -1)):
                 node.children.append(child)
+                frontier.push(child,child.cost)
+            
+            elif ((existingChild != -1) and ( existingChild.cost > child.cost)):
+                #cheaper path, update frontier
+                existingChild.parent = node
+                existingChild.cost = cost
+                existingChild.action = action
 
-                if problem.isGoalState(state):
-                    actions = solution(problem, child)
-                    #print "Found goal!!! :",actions
-                    return actions
-                else:
-                    frontier.push(child,child.cost)
+
 
 
 def nullHeuristic(state, problem=None):
