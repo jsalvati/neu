@@ -236,9 +236,49 @@ def nullHeuristic(state, problem=None):
 
 def aStarSearch(problem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+            
+    frontier = util.PriorityQueue()
 
+    explored = []
+    actions = []
+    node = Node(problem.getStartState(), None, [])
+    frontier.push(node, 0)
+    
+    while 1:
+        if frontier.isEmpty():
+            return actions
+            
+        node = frontier.pop()
+
+        if(problem.isGoalState(node.state)):
+            actions = solution(problem, node)
+            return actions
+
+        explored.append(node.state)
+        for childNode in problem.getSuccessors(node.state):
+
+            state,action,cost = childNode
+            
+            child = Node(state,node,[])
+            child.action = action
+            child.cost = node.cost + cost
+            child.estimation = child.cost + heuristic(child.state, problem)
+
+            existingChild = findChildInFrontier(child, frontier.heap)
+
+            if ( (not state in explored) and (existingChild == -1)):
+                node.children.append(child)
+                frontier.push(child,child.estimation)
+                #frontier.print_heap()
+            
+            elif ((existingChild != -1) and ( existingChild.cost > child.cost)):
+                #cheaper path, update frontier
+                existingChild.parent = node
+                existingChild.cost = cost
+                existingChild.action = action
+                
+                #?? this should update the list, not add a new one...
+                frontier.push(existingChild,child.estimation) 
 
 
 def solution(problem, node):
