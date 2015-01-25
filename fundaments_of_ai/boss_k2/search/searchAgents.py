@@ -287,22 +287,29 @@ class CornersProblem(search.SearchProblem):
         self._expanded = 0 # DO NOT CHANGE; Number of search nodes expanded
         # Please add any code here which you would like to use
         # in initializing the problem
-        "*** YOUR CODE HERE ***"
+    
+        self.unvisited_corners = [(1,1),(1,top),(right,1),(right,top)]
+        self.startState = (self.startingPosition,[(1,1),(1,top),(right,1),(right,top)])
 
     def getStartState(self):
         """
         Returns the start state (in your state space, not the full Pacman state
         space)
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        return self.startState
+        
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        position, unvisited_corners = state
+
+        if (len(unvisited_corners) == 0):
+            return True
+        
+        return False
 
     def getSuccessors(self, state):
         """
@@ -323,8 +330,23 @@ class CornersProblem(search.SearchProblem):
             #   dx, dy = Actions.directionToVector(action)
             #   nextx, nexty = int(x + dx), int(y + dy)
             #   hitsWall = self.walls[nextx][nexty]
-
-            "*** YOUR CODE HERE ***"
+            
+            
+            currentPosition,unvisited_corners = state
+            x,y = currentPosition
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            hitsWall = self.walls[nextx][nexty]
+            if(not hitsWall):
+                #python vodoo, need to make sure i am creating a new list object else i deduct from all other states unvisited_corners 
+                #list
+                new_unvisited_corners = list(unvisited_corners)
+                nextPosition = (nextx,nexty)
+                if(nextPosition in unvisited_corners):
+                   new_unvisited_corners.remove(nextPosition)
+                successor = (((nextx,nexty),new_unvisited_corners), action,1)
+                successors.append(successor)
+            
 
         self._expanded += 1 # DO NOT CHANGE
         return successors

@@ -160,14 +160,15 @@ def breadthFirstSearch(problem):
     
     while 1:
         if frontier.isEmpty():
+            print "Frontier is empty :-("
             return actions
-            node = frontier.pop()
             
         node = frontier.pop()
+        #print "Node state when popin: ",node.state
 
         if(problem.isGoalState(node.state)):
             actions = solution(problem, node)
-            print "Found goal!!! :",explored
+            #print "Found goal!!! :",explored
             return actions
 
         explored.append(node.state)
@@ -179,6 +180,7 @@ def breadthFirstSearch(problem):
             child.cost = cost
 
             if ( (not state in explored) and (not isChildInFrontier(child, frontier.list))):
+                #print state
                 node.children.append(child)
                 frontier.push(child)
                     
