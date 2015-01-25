@@ -95,68 +95,77 @@ def depthFirstSearch(problem):
     """
 
     frontier = util.Stack()
+    frindgeStates = []
     explored = []
     actions = []
     node = Node(problem.getStartState(), None, [])
     frontier.push(node)
+    frindgeStates.append(node.state)
     
     while 1:
         if frontier.isEmpty():
             return actions
+            
         node = frontier.pop()
+
+        if(problem.isGoalState(node.state)):
+            actions = solution(problem, node)
+            print "Found goal!!! :",explored
+            return actions
+
         explored.append(node.state)
+
         for childNode in problem.getSuccessors(node.state):
             
             state,action,cost = childNode
 
-            if (not state in explored):
+            if ( (not state in explored) ):
                 child = Node(state,node,[])
                 child.action = action
                 child.cost = cost
 
                 node.children.append(child)
+                frontier.push(child)
+                frindgeStates.append(child.state)
 
-                if problem.isGoalState(state):
-                    actions = solution(problem, child)
-                    print "Found goal!!! :",actions
-                    return actions
-                else:
-                    frontier.push(child)
-                    
-    
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
 
 
     frontier = util.Queue()
+    frindgeStates = []
     explored = []
     actions = []
     node = Node(problem.getStartState(), None, [])
     frontier.push(node)
+    frindgeStates.append(node.state)
     
     while 1:
         if frontier.isEmpty():
             return actions
+            node = frontier.pop()
+            
         node = frontier.pop()
+
+        if(problem.isGoalState(node.state)):
+            actions = solution(problem, node)
+            print "Found goal!!! :",explored
+            return actions
+
         explored.append(node.state)
         for childNode in problem.getSuccessors(node.state):
             
             state,action,cost = childNode
 
-            if (not state in explored):
+            if ( (not state in explored) and (not state in frindgeStates)):
                 child = Node(state,node,[])
                 child.action = action
                 child.cost = cost
 
                 node.children.append(child)
-
-                if problem.isGoalState(state):
-                    actions = solution(problem, child)
-                    print "Found goal!!! :",actions
-                    return actions
-                else:
-                    frontier.push(child)
+                frontier.push(child)
+                frindgeStates.append(child.state)
                     
 
 def uniformCostSearch(problem):
@@ -186,7 +195,7 @@ def uniformCostSearch(problem):
 
                 if problem.isGoalState(state):
                     actions = solution(problem, child)
-                    print "Found goal!!! :",actions
+                    #print "Found goal!!! :",actions
                     return actions
                 else:
                     frontier.push(child,child.cost)
