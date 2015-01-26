@@ -365,6 +365,58 @@ class CornersProblem(search.SearchProblem):
         return len(actions)
 
 
+def cornerHeuristic():
+    
+    position, unvisited_corners = ((1, 1), [(1, 3), (4, 1), (4, 3)])
+    
+    if(len(unvisited_corners)):
+    
+        temp_unvisited_corners = list(unvisited_corners)
+
+        #find shortest distance between all corners
+        distance = 0
+        temp_position = position
+
+        #print position
+        #print unvisited_corners
+
+        while (len(temp_unvisited_corners) > 0):
+            
+            minimum = None
+            mincorner = None
+
+
+            for corner in temp_unvisited_corners:
+                xy1 = temp_position
+                xy2 = corner
+                result = (abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])) 
+                if(minimum == None):
+                    minimum = result
+                    mincorner = corner
+                elif(result < minimum):
+                    minimum = result
+                    mincorner = corner
+                
+            print "temp_position:",temp_position
+            print "corner:",mincorner
+            print "minimum:",minimum
+            print "distance:",distance
+            print "length of list:",len(temp_unvisited_corners)
+            
+            distance = distance + minimum
+            temp_position = mincorner
+            temp_unvisited_corners.remove(mincorner)
+
+        #if(state == problem.getStartState()):
+        #    print corners
+        #    print distance
+
+        #print distance
+        return distance
+    else:
+        return 0
+    
+
 def cornersHeuristic(state, problem):
     """
     A heuristic for the CornersProblem that you defined.
@@ -381,8 +433,54 @@ def cornersHeuristic(state, problem):
     corners = problem.corners # These are the corner coordinates
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
 
-    "*** YOUR CODE HERE ***"
-    return 0 # Default to trivial solution
+    position,unvisited_corners = state
+    
+
+    if(len(unvisited_corners)):
+        
+        temp_unvisited_corners = list(unvisited_corners)
+
+        #find shortest distance between all corners
+        distance = 0
+        mincorner = None
+        temp_position = position
+
+        #print position
+        #print unvisited_corners
+
+        while (len(temp_unvisited_corners) > 0):
+            
+            minimum = None
+
+            for corner in temp_unvisited_corners:
+                xy1 = temp_position
+                xy2 = corner
+                result = (abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])) 
+                if(minimum == None):
+                    minimum = result
+                    mincorner = corner
+                elif(result < minimum):
+                    minimum = result
+                    mincorner = corner
+                    minimum = result
+
+            #print "minimum:",minimum
+            #print "distance:",distance
+            #print "length of list:",len(temp_unvisited_corners)
+            
+            distance = distance + minimum
+            temp_position = mincorner
+            temp_unvisited_corners.remove(mincorner)
+
+        #if(state == problem.getStartState()):
+        #    print corners
+        #    print distance
+
+        #print distance
+        return distance
+    else:
+        return 0
+
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
