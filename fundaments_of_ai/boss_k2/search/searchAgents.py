@@ -40,6 +40,7 @@ from game import Actions
 import util
 import time
 import search
+import itertools
 
 class GoWestAgent(Agent):
     "An agent that goes West until it can't."
@@ -365,58 +366,6 @@ class CornersProblem(search.SearchProblem):
         return len(actions)
 
 
-def cornerHeuristic():
-    
-    position, unvisited_corners = ((1, 1), [(1, 3), (4, 1), (4, 3)])
-    
-    if(len(unvisited_corners)):
-    
-        temp_unvisited_corners = list(unvisited_corners)
-
-        #find shortest distance between all corners
-        distance = 0
-        temp_position = position
-
-        #print position
-        #print unvisited_corners
-
-        while (len(temp_unvisited_corners) > 0):
-            
-            minimum = None
-            mincorner = None
-
-
-            for corner in temp_unvisited_corners:
-                xy1 = temp_position
-                xy2 = corner
-                result = (abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])) 
-                if(minimum == None):
-                    minimum = result
-                    mincorner = corner
-                elif(result < minimum):
-                    minimum = result
-                    mincorner = corner
-                
-            print "temp_position:",temp_position
-            print "corner:",mincorner
-            print "minimum:",minimum
-            print "distance:",distance
-            print "length of list:",len(temp_unvisited_corners)
-            
-            distance = distance + minimum
-            temp_position = mincorner
-            temp_unvisited_corners.remove(mincorner)
-
-        #if(state == problem.getStartState()):
-        #    print corners
-        #    print distance
-
-        #print distance
-        return distance
-    else:
-        return 0
-    
-
 def cornersHeuristic(state, problem):
     """
     A heuristic for the CornersProblem that you defined.
@@ -445,8 +394,6 @@ def cornersHeuristic(state, problem):
         mincorner = None
         temp_position = position
 
-        #print position
-        #print unvisited_corners
 
         while (len(temp_unvisited_corners) > 0):
             
@@ -464,19 +411,11 @@ def cornersHeuristic(state, problem):
                     mincorner = corner
                     minimum = result
 
-            #print "minimum:",minimum
-            #print "distance:",distance
-            #print "length of list:",len(temp_unvisited_corners)
             
             distance = distance + minimum
             temp_position = mincorner
             temp_unvisited_corners.remove(mincorner)
 
-        #if(state == problem.getStartState()):
-        #    print corners
-        #    print distance
-
-        #print distance
         return distance
     else:
         return 0
@@ -544,6 +483,8 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchFunction = lambda prob: search.aStarSearch(prob, foodHeuristic)
         self.searchType = FoodSearchProblem
 
+
+
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -573,7 +514,54 @@ def foodHeuristic(state, problem):
     problem.heuristicInfo['wallCount']
     """
     position, foodGrid = state
-    "*** YOUR CODE HERE ***"
+
+    foodCoords = foodGrid.asList()
+
+    if(len(foodCoords)):
+        
+        food_list = list(foodCoords)
+        #find shortest distance between all corners
+        distance = 0
+        temp_position = position
+
+        while (len(food_list) > 0):
+
+            minimum = None
+            minfood = None
+
+            #print "food_list within while; ",food_list
+
+            for food in food_list:
+                xy1 = temp_position
+                xy2 = food
+                result = (abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])) 
+                #print "xy1:",xy1
+                #print "xy2:",xy2
+                #print result
+                if(minimum == None):
+                    minimum = result
+                    minfood = food
+                elif(result < minimum):
+                    minimum = result
+                    minfood = food
+
+            distance = distance + minimum
+
+            temp_position = minfood
+            #print "food going to be removed: ",minfood
+            #print "food_list:",food_list
+            food_list.remove(minfood)
+            #print "food_list after remove:",food_list
+
+
+            #print "finished iterating food list"
+
+        return distance
+    
+
+    else:
+        return 0
+
     return 0
 
 class ClosestDotSearchAgent(SearchAgent):
