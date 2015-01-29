@@ -531,6 +531,7 @@ def foodHeuristic(state, problem):
 
             #print "food_list within while; ",food_list
 
+            
             for food in food_list:
                 xy1 = temp_position
                 xy2 = food
@@ -592,8 +593,25 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        foodList = food.asList()
+
+        closestFood = None
+        minDistance = 9999999
+        for food in foodList:
+            if closestFood == None:
+                closestFood = food
+                minDistance = util.manhattanDistance(startPosition,food)
+            else:
+                distance = util.manhattanDistance(startPosition,food)
+                if (distance < minDistance):
+                    closestFood = food
+                    minDistance = distance
+        
+        problem.goal = closestFood
+
+        actions = search.aStarSearch(problem, heuristic=manhattanHeuristic)
+        
+        return actions
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -614,7 +632,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         "Stores information from the gameState.  You don't need to change this."
         # Store the food for later reference
         self.food = gameState.getFood()
-
+        self.gameState = gameState
         # Store info for the PositionSearchProblem (no need to change this)
         self.walls = gameState.getWalls()
         self.startState = gameState.getPacmanPosition()
@@ -627,9 +645,27 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
+        foodList = self.food.asList()
 
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        closestFood = None
+        minDistance = 9999999
+        for food in foodList:
+            if closestFood == None:
+                closestFood = food
+                minDistance = util.manhattanDistance(state,food)
+            else:
+                distance = util.manhattanDistance(state,food)
+                if (distance < minDistance):
+                    closestFood = food
+                    minDistance = distance
+
+        if state == closestFood:
+            return True
+        else:
+            return False
+            
+                   
+        
 
 def mazeDistance(point1, point2, gameState):
     """
