@@ -442,12 +442,16 @@ class FoodSearchProblem:
         self.startingGameState = startingGameState
         self._expanded = 0 # DO NOT CHANGE
         self.heuristicInfo = {} # A dictionary for the heuristic to store information
+        self.heuristicInfo['minTour'] = None
+        self.heuristicInfo['runGreedy'] = False
 
     def getStartState(self):
         return self.start
 
     def isGoalState(self, state):
-        return state[1].count() == 0
+        if state[1].count() == 0:
+            self.heuristicInfo['runGreedy'] = False
+            return True
 
     def getSuccessors(self, state):
         "Returns successor states, the actions they require, and a cost of 1."
@@ -484,7 +488,116 @@ class AStarFoodSearchAgent(SearchAgent):
         self.searchType = FoodSearchProblem
 
 
+def findMinFoodDistanceTSP ( foodList , startPosition):
+    
+    #find closest food to startPosition
+    '''
+    minimum = None
+    minfood = None
+    for food in foodList:
+        xy1 = startPosition
+        xy2 = food
+        result = (abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])) 
+        #print "xy1:",xy1
+        #print "xy2:",xy2
+        #print result
+        if(minimum == None):
+            minimum = result
+            minfood = food
+        elif(result < minimum):
+            minimum = result
+            minfood = food
+    
+    #remove minimum food from food list to pull out from permutations
+    foodList.remove(minfood)
+    '''
+    ###foodTours = itertools.combinations(foodList, 1)
+    foodTours = itertools.permutations(foodList)
 
+    failCounter = 0
+    failThreshold = 50000
+    minimum = 9999999999
+    minTour = None
+
+    for tour in foodTours:
+        tour = list(tour)
+ 
+        tour.insert(0,startPosition)
+
+        distance,tour = tourDistance(tour,minimum)
+        
+        if(distance != None):
+            if(distance < minimum):
+                print "found better path! : ",distance
+                failCounter = 0
+                minimum = distance
+                minTour = [list(tour), minimum]
+
+    return minimum,minTour
+
+        
+def tourDistance ( tour , minimum):
+    
+    lastFood = None
+    currentFood = None
+    totalDistance = 0
+
+    for food in tour:
+        if(lastFood == None):
+            lastFood = [food,0]
+        else:
+            currentFood = food
+            
+            lastFoodPoint,distance  = lastFood
+
+            distance = util.manhattanDistance(lastFoodPoint, currentFood)
+            food = [food, distance]
+            totalDistance += distance
+            lastFood = food
+
+            
+            if totalDistance > minimum:
+                #print "found bad tour, rejecting"
+                return None,tour
+
+    return totalDistance,tour
+
+
+def foodHeuristicGreedy(startPosition,foodCoords):
+    
+    if(len(foodCoords)):
+        
+        food_list = list(foodCoords)
+        distance = 0
+        temp_position = startPosition
+
+        while(len(food_list)):
+
+            minimum = None
+            minfood = None
+
+            for food in food_list:
+                xy1 = temp_position
+                xy2 = food
+                result = (abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])) 
+                if(minimum == None):
+                    minimum = result
+                    minfood = food
+                elif(result < minimum):
+                    minimum = result
+                    minfood = food
+
+            distance = distance + minimum
+            temp_position = minfood
+            food_list.remove(minfood)
+
+        return distance
+    
+
+    else:
+
+        return 0
+    
 def foodHeuristic(state, problem):
     """
     Your heuristic for the FoodSearchProblem goes here.
@@ -517,51 +630,79 @@ def foodHeuristic(state, problem):
 
     foodCoords = foodGrid.asList()
 
-    if(len(foodCoords)):
-        
-        food_list = list(foodCoords)
-        #find shortest distance between all corners
-        distance = 0
-        temp_position = position
-
-        while (len(food_list) > 0):
-
-            minimum = None
-            minfood = None
-
-            #print "food_list within while; ",food_list
-
-            
-            for food in food_list:
-                xy1 = temp_position
-                xy2 = food
-                result = (abs(xy1[0] - xy2[0]) + abs(xy1[1] - xy2[1])) 
-                #print "xy1:",xy1
-                #print "xy2:",xy2
-                #print result
-                if(minimum == None):
-                    minimum = result
-                    minfood = food
-                elif(result < minimum):
-                    minimum = result
-                    minfood = food
-
-            distance = distance + minimum
-
-            temp_position = minfood
-            #print "food going to be removed: ",minfood
-            #print "food_list:",food_list
-            food_list.remove(minfood)
-            #print "food_list after remove:",food_list
-
-
-            #print "finished iterating food list"
-
-        return distance
+    #print "foodcoords length: ",len(foodCoords)
     
+    if((len(foodCoords) > 10) or problem.heuristicInfo['runGreedy']):
+        
+        problem.heuristicInfo['runGreedy'] = True
+        distance = foodHeuristicGreedy(position,foodCoords)
+        return distance
 
-    else:
-        return 0
+    elif (len(foodCoords)):
+        
+        if problem.heuristicInfo['minTour']  == None:
+            temp_unvisited_food = list(foodCoords)
+            
+            distance, minTour = findMinFoodDistanceTSP(temp_unvisited_food, position)
+
+            #pop the start position
+            print position
+            print minTour
+            tour, distance = minTour
+
+            startPosition = tour.pop(0)
+            newDistance,a = tourDistance(tour,distance)
+            startDistance = util.manhattanDistance(startPosition,tour[0])
+            
+            #print "first mintour:",minTour
+            problem.heuristicInfo ['minTour'] = (tour,newDistance)
+            problem.heuristicInfo [str(len(foodCoords))] = (tour,newDistance)
+
+            print tour
+            firstPoint = tour[0]
+            
+            totalDistance = newDistance + util.manhattanDistance(position,firstPoint)
+            print firstPoint
+            print position
+            print totalDistance
+
+            return totalDistance
+
+        else:
+            try:
+                minTour, distance = problem.heuristicInfo [str(len(foodCoords))]
+                print "mintour:",minTour
+                print "distance; ",distance
+
+                firstPoint = minTour[0] 
+                totalDistance = distance + util.manhattanDistance(position,firstPoint)
+
+                return totalDistance
+                
+            except KeyError:
+                
+                minTour, distance = problem.heuristicInfo [str(len(foodCoords)+1)]
+
+                print "position:",position
+                print "foodCoords:,",foodCoords
+                print "length of foodCoords:,",len(foodCoords)
+                print minTour
+                print distance
+                
+                
+                if(len(minTour)>1):
+                    minTour.remove(position)
+                    newDistance,a = tourDistance(minTour, distance)
+                    problem.heuristicInfo['minTour'] = (minTour,newDistance)
+                    print "after updating problem state : ,",problem.heuristicInfo['minTour']
+                    firstPoint = minTour[0] 
+                    totalDistance = distance + util.manhattanDistance(position,firstPoint)
+                    
+                else:
+                    firstPoint = minTour[0] 
+                    totalDistance = distance + util.manhattanDistance(position,firstPoint)
+
+                return totalDistance
 
     return 0
 
@@ -593,25 +734,8 @@ class ClosestDotSearchAgent(SearchAgent):
         walls = gameState.getWalls()
         problem = AnyFoodSearchProblem(gameState)
 
-        foodList = food.asList()
-
-        closestFood = None
-        minDistance = 9999999
-        for food in foodList:
-            if closestFood == None:
-                closestFood = food
-                minDistance = util.manhattanDistance(startPosition,food)
-            else:
-                distance = util.manhattanDistance(startPosition,food)
-                if (distance < minDistance):
-                    closestFood = food
-                    minDistance = distance
-        
-        problem.goal = closestFood
-
-        actions = search.aStarSearch(problem, heuristic=manhattanHeuristic)
-        
-        return actions
+        "*** YOUR CODE HERE ***"
+        util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -632,7 +756,7 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         "Stores information from the gameState.  You don't need to change this."
         # Store the food for later reference
         self.food = gameState.getFood()
-        self.gameState = gameState
+
         # Store info for the PositionSearchProblem (no need to change this)
         self.walls = gameState.getWalls()
         self.startState = gameState.getPacmanPosition()
@@ -645,27 +769,9 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         complete the problem definition.
         """
         x,y = state
-        foodList = self.food.asList()
 
-        closestFood = None
-        minDistance = 9999999
-        for food in foodList:
-            if closestFood == None:
-                closestFood = food
-                minDistance = util.manhattanDistance(state,food)
-            else:
-                distance = util.manhattanDistance(state,food)
-                if (distance < minDistance):
-                    closestFood = food
-                    minDistance = distance
-
-        if state == closestFood:
-            return True
-        else:
-            return False
-            
-                   
-        
+        "*** YOUR CODE HERE ***"
+        util.raiseNotDefined()
 
 def mazeDistance(point1, point2, gameState):
     """
