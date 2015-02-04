@@ -160,15 +160,12 @@ def breadthFirstSearch(problem):
     
     while 1:
         if frontier.isEmpty():
-            print "Frontier is empty :-("
             return actions
             
         node = frontier.pop()
-        #print "Node state when popin: ",node.state
 
         if(problem.isGoalState(node.state)):
             actions = solution(problem, node)
-            #print "Found goal!!! :",explored
             return actions
 
         explored.append(node.state)
@@ -180,7 +177,6 @@ def breadthFirstSearch(problem):
             child.cost = cost
 
             if ( (not state in explored) and (not isChildInFrontier(child, frontier.list))):
-                #print state
                 node.children.append(child)
                 frontier.push(child)
                     
@@ -271,15 +267,13 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             if ( (not state in explored) and (existingChild == -1)):
                 node.children.append(child)
                 frontier.push(child,child.estimation)
-                #frontier.print_heap()
             
             elif ((existingChild != -1) and ( existingChild.cost > child.cost)):
                 #cheaper path, update frontier
                 existingChild.parent = node
                 existingChild.cost = cost
                 existingChild.action = action
-                
-                #?? this should update the list, not add a new one...
+            
                 frontier.push(existingChild,child.estimation) 
 
 
