@@ -200,8 +200,138 @@ class MinimaxAgent(MultiAgentSearchAgent):
           gameState.getNumAgents():
             Returns the total number of agents in the game
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        
+        action = self.MinimaxDecision(gameState)
+
+        return action
+        
+    def MinimaxDecision(self, gameState):
+
+        currentDepth = 0
+
+        minVals = []
+
+        print gameState.getLegalActions(0)
+        print self.depth
+        
+        for action in gameState.getLegalActions(0):
+            minVals.append((self.MinValue(gameState.generateSuccessor(0,action), currentDepth, 1), action))
+
+        print "minimax Decision: ",minVals
+
+        maxC = -999999.0
+        maxAction = None
+        for pair in minVals:
+            maxVal, action = pair
+            if(maxVal > maxC):
+                maxC = maxVal
+
+                maxAction = action
+
+        return maxAction
+    
+
+
+    def MinValue(self, gameState,currentDepth,currentGhost):
+        
+        cDepth = currentDepth
+
+        '''
+        if(self.depth == 1):
+            print "last ghost"
+            ghostMax = []
+            
+            for action in gameState.getLegalActions(currentGhost):
+                
+                ghostMax.append(self.MaxValue(gameState.generateSuccessor(currentGhost,action), cDepth))
+                
+            print "min val result: ",ghostMax
+            print "min val depth: ",cDepth
+            
+            print "returning from minval"
+            return min(ghostMax)
+        '''
+
+        if(cDepth == self.depth):     
+                        
+            return self.evaluationFunction(gameState)
+
+        if not gameState.getLegalActions(currentGhost):
+            return self.evaluationFunction(gameState)
+
+        else:
+
+            
+            nGhosts = (gameState.getNumAgents())-1
+            ghostMax = []
+           # print currentGhost
+           # print nGhosts
+
+            if(currentGhost < nGhosts):
+
+                for action in gameState.getLegalActions(currentGhost):
+                
+                    ghostMax.append(self.MinValue(gameState.generateSuccessor(currentGhost,action), cDepth,currentGhost+1))
+
+              #  print "max min val result: ",ghostMax
+              #  print "max val depth: ",cDepth
+
+              #  print "returning from minval"
+                return min(ghostMax)
+
+            else:
+                
+                
+               # print "last ghost"
+
+                for action in gameState.getLegalActions(currentGhost):
+            
+                    ghostMax.append(self.MaxValue(gameState.generateSuccessor(currentGhost,action), cDepth+1))
+                
+                #print "min val result: ",ghostMax
+                #print "min val depth: ",cDepth
+                
+               # print "returning from minval"
+                return min(ghostMax)
+            
+        
+
+    def MaxValue(self, gameState, currentDepth):
+
+        cDepth = currentDepth
+
+        #print "depth in  max value: ",cDepth
+
+        if not gameState.getLegalActions(0):
+            return self.evaluationFunction(gameState)
+
+        if(cDepth == self.depth):
+            
+            return self.evaluationFunction(gameState)
+
+        else:
+
+            pacManActions = gameState.getLegalActions(0)
+            pacManMinVals = []
+
+            if(pacManActions):
+                for action in pacManActions:
+                    
+                    pacManMinVals.append(self.MinValue(gameState.generateSuccessor(0,action), cDepth,1))
+                    
+                    ##print "returning from maxval"
+                    
+                #print "max val result: ",pacManMinVals
+                #print "max val depth: ",cDepth
+                    
+
+                return max(pacManMinVals)
+            else:
+                #print "ugh getting here, ",pacManActions
+                return 0
+            
+
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
