@@ -402,15 +402,91 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
       Your expectimax agent (question 4)
     """
 
+
     def getAction(self, gameState):
         """
-          Returns the expectimax action using self.depth and self.evaluationFunction
-
-          All ghosts should be modeled as choosing uniformly at random from their
-          legal moves.
+          Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        action = self.MinimaxDecision(gameState)
+
+        return action
+        
+    def MinimaxDecision(self, gameState):
+
+        currentDepth = 0
+
+        minVals = []
+
+        for action in gameState.getLegalActions(0):
+            minVals.append((self.ExpectValue(gameState.generateSuccessor(0,action), currentDepth, 1), action))
+ 
+
+        maxC = -999999.0
+        maxAction = None
+        for pair in minVals:
+            maxVal, action = pair
+            if(maxVal > maxC):
+                maxC = maxVal
+                maxAction = action
+
+        return maxAction
+    
+
+    def ExpectValue(self, gameState,currentDepth,currentGhost):
+        
+        v = 0
+        cDepth = currentDepth
+        if(cDepth == self.depth):  
+            return self.evaluationFunction(gameState)
+
+        if not gameState.getLegalActions(currentGhost):
+            return self.evaluationFunction(gameState)
+
+        else:
+            
+            nGhosts = (gameState.getNumAgents())-1
+        
+            prob = (1.0/len(gameState.getLegalActions(currentGhost)))
+
+            for action in gameState.getLegalActions(currentGhost):
+                
+
+                if(currentGhost < nGhosts):
+                    
+                    v += prob*(self.ExpectValue(gameState.generateSuccessor(currentGhost,action), \
+                                            cDepth,currentGhost+1))
+                else:
+                    v += prob*(self.MaxValue(gameState.generateSuccessor(currentGhost,action), \
+                                                  cDepth+1))
+                
+            return v
+            
+        
+
+    def MaxValue(self, gameState, currentDepth):
+
+        cDepth = currentDepth
+
+        if not gameState.getLegalActions(0):
+            return self.evaluationFunction(gameState)
+
+        if(cDepth == self.depth):
+            return self.evaluationFunction(gameState)
+
+        else:
+
+            pacManActions = gameState.getLegalActions(0)
+            pacManMinVals = []
+
+            for action in pacManActions:
+                
+                pacManMinVals.append(self.ExpectValue(gameState.generateSuccessor(0,action), cDepth,1))  
+
+
+            return max(pacManMinVals)
+
+
 
 def betterEvaluationFunction(currentGameState):
     """
