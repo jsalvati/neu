@@ -177,6 +177,8 @@ class MultiAgentSearchAgent(Agent):
         self.index = 0 # Pacman is always agent index 0
         self.evaluationFunction = util.lookup(evalFn, globals())
         self.depth = int(depth)
+        self.alpha = None
+        self.beta = None
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -212,9 +214,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
         minVals = []
 
-        print gameState.getLegalActions(0)
-        print self.depth
-        
         for action in gameState.getLegalActions(0):
             minVals.append((self.MinValue(gameState.generateSuccessor(0,action), currentDepth, 1), action))
 
@@ -224,7 +223,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
             maxVal, action = pair
             if(maxVal > maxC):
                 maxC = maxVal
-
                 maxAction = action
 
         return maxAction
@@ -287,17 +285,117 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
 
 
+
 class AlphaBetaAgent(MultiAgentSearchAgent):
     """
       Your minimax agent with alpha-beta pruning (question 3)
     """
 
+
     def getAction(self, gameState):
         """
           Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        action = self.MinimaxDecision(gameState)
+
+        return action
+        
+    def MinimaxDecision(self, gameState):
+
+        currentDepth = 0
+
+        minVals = []
+        alpha = -9999999
+        beta = 9999999
+
+        for action in gameState.getLegalActions(0):
+            minVals.append((self.MinValue(gameState.generateSuccessor(0,action), currentDepth, 1,alpha,beta), action))
+            
+            alpha,action = max(alpha,max(minVals))
+
+        maxC = -999999.0
+        maxAction = None
+        for pair in minVals:
+            maxVal, action = pair
+            if(maxVal > maxC):
+                maxC = maxVal
+                maxAction = action
+
+        return maxAction
+    
+
+    def MinValue(self, gameState,currentDepth,currentGhost,alpha,beta):
+        
+
+        v = 99999999
+        
+
+        cDepth = currentDepth
+        if(cDepth == self.depth):  
+            return self.evaluationFunction(gameState)
+
+        if not gameState.getLegalActions(currentGhost):
+            return self.evaluationFunction(gameState)
+
+        else:
+            
+            nGhosts = (gameState.getNumAgents())-1
+            ghostMax = []
+           
+
+            for action in gameState.getLegalActions(currentGhost):
+                if(currentGhost < nGhosts):
+                    v = min(v,self.MinValue(gameState.generateSuccessor(currentGhost,action), \
+                                            cDepth,currentGhost+1,alpha,beta))
+                else:
+                    v = min(v,self.MaxValue(gameState.generateSuccessor(currentGhost,action), \
+                                                  cDepth+1,alpha,beta))
+                    
+                if v < alpha:
+            
+                    return v
+                    
+                beta = min(beta,v)
+                
+            return v
+            
+        
+
+    def MaxValue(self, gameState, currentDepth, alpha, beta):
+
+        cDepth = currentDepth
+
+        if not gameState.getLegalActions(0):
+            return self.evaluationFunction(gameState)
+
+        if(cDepth == self.depth):
+            return self.evaluationFunction(gameState)
+
+        else:
+
+            pacManActions = gameState.getLegalActions(0)
+            pacManMinVals = []
+
+            for action in pacManActions:
+                
+                pacManMinVals.append(self.MinValue(gameState.generateSuccessor(0,action), cDepth,1,alpha,beta))  
+
+                #print "current max; ",max(pacManMinVals)
+                #print "beta: ",self.beta
+  
+                if (beta != None):
+                    if max(pacManMinVals) > beta:
+                        print "rejecting self.beta"
+                        return max(pacManMinVals)
+
+                
+                alpha = max(alpha,max(pacManMinVals))
+                #rint "alpha: ",self.alpha
+
+            return max(pacManMinVals)
+
+
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
     """
