@@ -218,8 +218,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         for action in gameState.getLegalActions(0):
             minVals.append((self.MinValue(gameState.generateSuccessor(0,action), currentDepth, 1), action))
 
-        print "minimax Decision: ",minVals
-
         maxC = -999999.0
         maxAction = None
         for pair in minVals:
@@ -232,67 +230,35 @@ class MinimaxAgent(MultiAgentSearchAgent):
         return maxAction
     
 
-
     def MinValue(self, gameState,currentDepth,currentGhost):
         
         cDepth = currentDepth
-
-        '''
-        if(self.depth == 1):
-            print "last ghost"
-            ghostMax = []
-            
-            for action in gameState.getLegalActions(currentGhost):
-                
-                ghostMax.append(self.MaxValue(gameState.generateSuccessor(currentGhost,action), cDepth))
-                
-            print "min val result: ",ghostMax
-            print "min val depth: ",cDepth
-            
-            print "returning from minval"
-            return min(ghostMax)
-        '''
-
         if(cDepth == self.depth):     
-                        
             return self.evaluationFunction(gameState)
 
         if not gameState.getLegalActions(currentGhost):
             return self.evaluationFunction(gameState)
 
         else:
-
             
             nGhosts = (gameState.getNumAgents())-1
             ghostMax = []
-           # print currentGhost
-           # print nGhosts
 
             if(currentGhost < nGhosts):
 
                 for action in gameState.getLegalActions(currentGhost):
                 
-                    ghostMax.append(self.MinValue(gameState.generateSuccessor(currentGhost,action), cDepth,currentGhost+1))
+                    ghostMax.append(self.MinValue(gameState.generateSuccessor(currentGhost,action), \
+                                                  cDepth,currentGhost+1))
 
-              #  print "max min val result: ",ghostMax
-              #  print "max val depth: ",cDepth
-
-              #  print "returning from minval"
                 return min(ghostMax)
 
             else:
-                
-                
-               # print "last ghost"
 
                 for action in gameState.getLegalActions(currentGhost):
             
-                    ghostMax.append(self.MaxValue(gameState.generateSuccessor(currentGhost,action), cDepth+1))
-                
-                #print "min val result: ",ghostMax
-                #print "min val depth: ",cDepth
-                
-               # print "returning from minval"
+                    ghostMax.append(self.MaxValue(gameState.generateSuccessor(currentGhost,action), \
+                                                  cDepth+1))
                 return min(ghostMax)
             
         
@@ -300,8 +266,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
     def MaxValue(self, gameState, currentDepth):
 
         cDepth = currentDepth
-
-        #print "depth in  max value: ",cDepth
 
         if not gameState.getLegalActions(0):
             return self.evaluationFunction(gameState)
@@ -315,22 +279,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
             pacManActions = gameState.getLegalActions(0)
             pacManMinVals = []
 
-            if(pacManActions):
-                for action in pacManActions:
-                    
-                    pacManMinVals.append(self.MinValue(gameState.generateSuccessor(0,action), cDepth,1))
-                    
-                    ##print "returning from maxval"
-                    
-                #print "max val result: ",pacManMinVals
-                #print "max val depth: ",cDepth
-                    
+            for action in pacManActions:
+                
+                pacManMinVals.append(self.MinValue(gameState.generateSuccessor(0,action), cDepth,1))  
+                
+            return max(pacManMinVals)
 
-                return max(pacManMinVals)
-            else:
-                #print "ugh getting here, ",pacManActions
-                return 0
-            
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
