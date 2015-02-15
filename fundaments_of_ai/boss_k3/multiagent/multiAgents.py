@@ -100,7 +100,7 @@ class ReflexAgent(Agent):
             i += 1
 
         if list(newPos) in newFoodList:
-            print "food is adjacent!!"
+            #print "food is adjacent!!"
             score += 20
         else:
             score += movingTorwardsClosestFood(currentGameState.getPacmanPosition(), newPos, newFoodList)
@@ -140,14 +140,14 @@ def pacmanNearGhost(newPos, ghostPos):
     dx = abs(x2-x1)
     dy = abs(y2-y1)
     
-    close = (((dx <= 3) and (dy == 0)) or \
-             ((dy <= 3) and (dx == 0)) or \
-             ((dx <= 2) and (dy <= 2)) )
+    close = (((dx <= 2) and (dy == 0)) or \
+             ((dy <= 2) and (dx == 0)) or \
+             ((dx <= 1) and (dy <= 1)) )
 
     #print dx,dy
     
 
-    return 
+    return close
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -389,7 +389,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
   
                 if (beta != None):
                     if max(pacManMinVals) > beta:
-                        print "rejecting self.beta"
+                        #print "rejecting self.beta"
                         return max(pacManMinVals)
 
                 
@@ -509,42 +509,17 @@ def betterEvaluationFunction(currentGameState):
     foodDistance = findDistanceToClosestDot(currentGameState)
     
     capsuleDistance = findDistanceToClosestCapsule(currentGameState)
-    
-    #print "food is : ",foodDistance
+
     if(foodCount > 0):
         score -= foodDistance*4
-        #score -= capsuleDistance*1
-    #elif(foodCount >= 0):
-    #    score -= foodDistance*100
-    #print "score is: ",score
 
-
-    #print currentPosition
-    #print betterEvaluationFunction.lastPosition
     if currentPosition == betterEvaluationFunction.lastPosition:
-        #print currentPosition
-        #print "i didnt move, move!!"
         score -= 100000
-        #score -= capsuleDistance*100000
-        #score -= 1000000
-
+ 
     for ghost in newGhostStates:
-        '''
-        if(currentPosition == ghost.getPosition()):
-            score -= 1000000
 
-        if(pacmanNearGhost(currentPosition, ghost.getPosition())):
-           score -= 2000
-
-        '''
-
-        #print currentPosition
-        #print ghost.getPosition()
         ghostDistance = util.manhattanDistance(currentPosition, ghost.getPosition())
 
-        #print newScaredTimes
-        #print newScaredTimes[0]
-        print ghostDistance
         if((newScaredTimes[0] == 0) and (ghostDistance < 14)):
 
             
@@ -557,28 +532,13 @@ def betterEvaluationFunction(currentGameState):
                 score -= (ghostDistance**2)*200
             else: 
                 score += 10000000000
-        #else:
-        #   score += 100
+
     
     if currentGameState.isWin():
         score += 1000000
 
-    #if currentGameState.getFood():
-    
-   # if(foodCount > 0):
-   #     score += currentGameState.getScore()
-   # else:
-   #     score += 1000000
-    #if((foodCount - lastFoodCount)==0):
-    #    score -= 1000
-    #else:
-    #    score += (foodCount-lastFoodCount)*1000
-    
     if (foodCount > 0):
         score -= foodCount*1000
-
-    #print foodCount
-    #print score
 
 
     betterEvaluationFunction.lastPosition = currentPosition
