@@ -140,13 +140,14 @@ def pacmanNearGhost(newPos, ghostPos):
     dx = abs(x2-x1)
     dy = abs(y2-y1)
     
-    close = (((dx <= 2) and (dy == 0)) or \
-             ((dy <= 2) and (dx == 0)) or \
-             ((dx == 1) and (dy == 1)) )
+    close = (((dx <= 3) and (dy == 0)) or \
+             ((dy <= 3) and (dx == 0)) or \
+             ((dx <= 2) and (dy <= 2)) )
 
-    print dx,dy
+    #print dx,dy
+    
 
-    return close
+    return 
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -179,6 +180,8 @@ class MultiAgentSearchAgent(Agent):
         self.depth = int(depth)
         self.alpha = None
         self.beta = None
+        self.currentFoodCount = None
+        self.lastFoodCount = None
 
 class MinimaxAgent(MultiAgentSearchAgent):
     """
@@ -493,11 +496,150 @@ def betterEvaluationFunction(currentGameState):
       Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
       evaluation function (question 5).
 
-      DESCRIPTION: <write something here so we know what you did>
     """
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    currentPosition = currentGameState.getPacmanPosition()
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+    food = currentGameState.getFood()
+    foodCount = len(food.asList())    
+    
+
+    score = 99999999
+    
+    foodDistance = findDistanceToClosestDot(currentGameState)
+    
+    capsuleDistance = findDistanceToClosestCapsule(currentGameState)
+    
+    #print "food is : ",foodDistance
+    if(foodCount > 0):
+        score -= foodDistance*4
+        #score -= capsuleDistance*1
+    #elif(foodCount >= 0):
+    #    score -= foodDistance*100
+    #print "score is: ",score
+
+
+    #print currentPosition
+    #print betterEvaluationFunction.lastPosition
+    if currentPosition == betterEvaluationFunction.lastPosition:
+        #print currentPosition
+        #print "i didnt move, move!!"
+        score -= 100000
+        #score -= capsuleDistance*100000
+        #score -= 1000000
+
+    for ghost in newGhostStates:
+        '''
+        if(currentPosition == ghost.getPosition()):
+            score -= 1000000
+
+        if(pacmanNearGhost(currentPosition, ghost.getPosition())):
+           score -= 2000
+
+        '''
+
+        #print currentPosition
+        #print ghost.getPosition()
+        ghostDistance = util.manhattanDistance(currentPosition, ghost.getPosition())
+
+        #print newScaredTimes
+        #print newScaredTimes[0]
+        print ghostDistance
+        if((newScaredTimes[0] == 0) and (ghostDistance < 14)):
+
+            
+            if(ghostDistance):
+                score -= ((1.0/ghostDistance))*200
+            else:
+                score -= 100000000
+        else:
+            if(ghostDistance):
+                score -= (ghostDistance**2)*200
+            else: 
+                score += 10000000000
+        #else:
+        #   score += 100
+    
+    if currentGameState.isWin():
+        score += 1000000
+
+    #if currentGameState.getFood():
+    
+   # if(foodCount > 0):
+   #     score += currentGameState.getScore()
+   # else:
+   #     score += 1000000
+    #if((foodCount - lastFoodCount)==0):
+    #    score -= 1000
+    #else:
+    #    score += (foodCount-lastFoodCount)*1000
+    
+    if (foodCount > 0):
+        score -= foodCount*1000
+
+    #print foodCount
+    #print score
+
+
+    betterEvaluationFunction.lastPosition = currentPosition
+    
+    return score
+    
+
+    
+
+def findDistanceToClosestDot(gameState):
+    """
+    Returns a path (a list of actions) to the closest dot, starting from
+    gameState.
+    """
+    # Here are some useful elements of the startState
+    startPosition = gameState.getPacmanPosition()
+    food = gameState.getFood()
+    foodList = food.asList()
+    
+    closestFood = None
+    maxDistance = 0
+    for food in foodList:
+        if closestFood == None:
+            closestFood = food
+            maxDistance = util.manhattanDistance(startPosition,food)
+        else:
+            distance = util.manhattanDistance(startPosition,food)
+            if (distance > maxDistance):
+                closestFood = food
+                maxDistance = distance
+                    
+    return maxDistance
+
+def findDistanceToClosestCapsule(gameState):
+    """
+    Returns a path (a list of actions) to the closest dot, starting from
+    gameState.
+    """
+    # Here are some useful elements of the startState
+    startPosition = gameState.getPacmanPosition()
+    foodList = gameState.getCapsules()
+    
+    closestFood = None
+    maxDistance = 999999999
+    for food in foodList:
+        if closestFood == None:
+            closestFood = food
+            maxDistance = util.manhattanDistance(startPosition,food)
+        else:
+            distance = util.manhattanDistance(startPosition,food)
+            if (distance < maxDistance):
+                closestFood = food
+                maxDistance = distance
+                    
+    return maxDistance
 
 # Abbreviation
 better = betterEvaluationFunction
 
+
+
+    
+betterEvaluationFunction.lastPosition = 0
+    
