@@ -88,17 +88,22 @@ class QLearningAgent(ReinforcementAgent):
         
         bestAction = None
         
-        if self.qValues.has_key(state):
-            
-            bestValue = -999999
-            actions = self.qValues[state]
-            for action in actions:
-                if self.getQValue(state, action) > bestValue:
-                    bestValue = self.getQValue(state, action)
-                    bestAction = action
-                elif self.getQValue(state, action) == bestValue:
-                    bestAction = random.choice([action, bestAction])
+        if (self.getLegalActions(state)):
+        
+            if self.qValues.has_key(state):
                 
+                bestValue = -999999
+                actions = self.qValues[state]
+                for action in actions:
+                    if self.getQValue(state, action) > bestValue:
+                        bestValue = self.getQValue(state, action)
+                        bestAction = action
+                    elif self.getQValue(state, action) == bestValue:
+                        bestAction = random.choice([action, bestAction])
+        
+            else:
+                actions = self.getLegalActions(state)
+                bestAction = random.choice(actions)
         
         return bestAction
         
