@@ -48,36 +48,35 @@ class ValueIterationAgent(ValueEstimationAgent):
         #Initialize values counter
         """
         for state in mdp.getStates():
-            self.values[state] = 0
+            if mdp.isTerminal(state):
+                exit = mdp.getPossibleActions(state)
+                
+                self.values[state] = mdp.getReward(state, "") 
+            else:
+                self.values[state] = 0
         """
 
         #perform value iteration
         #self.values[state] = 
         #  max Sigma( T(s,a,nS) [ R(s,a,nS) + discount value(nS) ] )
-        for i in range(0, iterations):
-
-            valuesCp = util.Counter()
-
+        for i in range(0,iterations):
+            
+                    
+            valuesCp = util.Counter()   
+            
             for state in mdp.getStates():
+                actionValues = []        
                 
-
-                if (mdp.isTerminal(state)):
-                    valuesCp[state] = 0
-
-                elif (mdp.getPossibleActions(state)):
+                if (mdp.getPossibleActions(state) and (not self.mdp.isTerminal(state))):
                 
-                    actionValues = []
-
                     for action in mdp.getPossibleActions(state):
-                        
-                        utility = self.computeQValueFromValues(state,action)
+                        utility = self.getQValue(state, action)
                         actionValues.append(utility)
-
                     valuesCp[state] = max(actionValues)
-
                 else:
                     valuesCp[state] = 0
-
+                    
+            
             self.values = valuesCp
                     
        
@@ -95,7 +94,7 @@ class ValueIterationAgent(ValueEstimationAgent):
           Compute the Q-value of action in state from the
           value function stored in self.values.
         """
-        
+                    
         nStateProbPair = self.mdp.getTransitionStatesAndProbs(state,action)
         utility= 0
         for nStatePair in nStateProbPair: 
@@ -118,24 +117,18 @@ class ValueIterationAgent(ValueEstimationAgent):
         """
 
         bestAction = None
-        bestValue = -9999999
-        actionValue = 0
-
+        bestValue = -9999999  
+        
         if((not self.mdp.isTerminal(state)) and self.mdp.getPossibleActions(state)):
-
-            #print self.mdp.getPossibleActions(state)
-            
+        
             for action in self.mdp.getPossibleActions(state):  
-            
+                utility = self.getQValue(state, action)
                 
+                if utility >= bestValue:
+                    bestAction  = action
+                    bestValue = utility
 
-                actionValue = self.computeQValueFromValues(state, action)
-                if actionValue > bestValue:
-                    bestValue = actionValue
-                    bestAction = action
  
-        #print bestAction
-
         return bestAction
             
 

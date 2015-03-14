@@ -18,9 +18,10 @@ import random
 import string
 import time
 import types
-import Tkinter
 
 _Windows = sys.platform == 'win32'  # True if on Win95/98/NT
+
+
 
 _root_window = None      # The root window for graphics output
 _canvas = None      # The canvas which holds graphics
