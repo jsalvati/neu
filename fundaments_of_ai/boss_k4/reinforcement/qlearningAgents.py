@@ -42,7 +42,11 @@ class QLearningAgent(ReinforcementAgent):
         "You can initialize Q-values here..."
         ReinforcementAgent.__init__(self, **args)
 
-        "*** YOUR CODE HERE ***"
+        #dictionary of
+        #  dictionary of
+        #    qValues per-action
+        self.qValues = {}
+
 
     def getQValue(self, state, action):
         """
@@ -50,9 +54,18 @@ class QLearningAgent(ReinforcementAgent):
           Should return 0.0 if we have never seen a state
           or the Q node value otherwise
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
 
+        value = 0
+        
+        if state in self.qValues:
+            
+            actionDict = self.qValues{state}
+            
+            if action in actionDict:
+                value = actionDict{action}
+
+        return value
+        
 
     def computeValueFromQValues(self, state):
         """
