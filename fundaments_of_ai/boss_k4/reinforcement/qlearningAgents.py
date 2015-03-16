@@ -51,7 +51,7 @@ class QLearningAgent(ReinforcementAgent):
           or the Q node value otherwise
         """
         
-        value = 0
+        value = 0.0
         
         if self.qValues.has_key(state):
             actionValues = self.qValues[state]
@@ -76,6 +76,7 @@ class QLearningAgent(ReinforcementAgent):
                 
             return bestValue
         else:
+            print "gah"
             return 0.0
         
         
@@ -220,16 +221,71 @@ class ApproximateQAgent(PacmanQAgent):
           Should return Q(state,action) = w * featureVector
           where * is the dotProduct operator
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        qValue = 0.0
+        
+        features = self.featExtractor.getFeatures(state,action)
+        
+        for key in features.keys():
+            qValue += (self.weights[key] * features[key])
+
+        #for feature in features:
+        #    qValue += self.weights[feature]*features[feature]
+
+        return qValue
 
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        
+        features = self.featExtractor.getFeatures(state,action)
+        actionValues = {}
+        legalActions = self.getLegalActions(state)
+        
+        
+        #print "reward: ",reward
+        #print "alpha; ",self.alpha
+        #print "discount: ",self.discount
+        #print "features are: ",features
+        #print "qVal next : ",self.getValue(nextState)
+        #print "qVal : ",self.getQValue(state,action)
+        
+        #-10 + 0.9 * 0 - 0
+        #0.1 * -10 * 0.9 = -0.9
 
+        if (not (self.qValues.has_key(state))):
+            
+            for legalAction in legalActions:
+                actionValues[legalAction] = 0.0
+
+            actionValues[action] = self.getQValue(state,action)
+            self.qValues[state] = actionValues
+
+        else:
+            actionValues = self.qValues[state]
+            actionValues[action] = self.getQValue(state,action)
+
+        
+        for key in features.keys():
+            self.weights[key] += self.alpha * (reward + self.discount * self.getValue(nextState) - self.getQValue(state,action)) * features[key]
+            #difference = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state,action)
+            #self.weights[key] += (self.alpha * difference * features[key])
+            
+            if len(features) > 1:
+                print self.weights[key]
+                print key
+                print features[key]
+
+        if len(features) > 1:
+            
+            print self.weights
+
+            
+
+ 
+        
+        
     def final(self, state):
         "Called at the end of each game."
         # call the super-class final method
@@ -238,5 +294,7 @@ class ApproximateQAgent(PacmanQAgent):
         # did we finish training?
         if self.episodesSoFar == self.numTraining:
             # you might want to print your weights here for debugging
+            print "weights are: ",self.weights
+
             "*** YOUR CODE HERE ***"
             pass
