@@ -52,10 +52,8 @@ class QLearningAgent(ReinforcementAgent):
         """
         
         value = 0.0
-        
-        if self.qValues.has_key(state):
-            actionValues = self.qValues[state]
-            value = actionValues[str(action)]
+        if self.qValues.has_key((state,action)):
+            value = self.qValues[(state,action)]
         
         return value
 
@@ -66,17 +64,15 @@ class QLearningAgent(ReinforcementAgent):
           there are no legal actions, which is the case at the
           terminal state, you should return a value of 0.0.
         """
-        
-        if self.qValues.has_key(state):
-            bestValue = -999999
-            actions = self.qValues[state]
-            for action in actions:
-                if self.getQValue(state, action) > bestValue:
-                    bestValue = self.getQValue(state, action)
-                
+
+        values = []
+        for action in self.getLegalActions(state):
+            values.append(self.getQValue(state,action))
+
+        if(len(values)):
+            bestValue = max(values)
             return bestValue
         else:
-            print "gah"
             return 0.0
         
         
@@ -88,23 +84,18 @@ class QLearningAgent(ReinforcementAgent):
         """
         
         bestAction = None
+        bestValue = -999999
+        actions = self.getLegalActions(state)
         
-        if (self.getLegalActions(state)):
+        if (len(actions)):
         
-            if self.qValues.has_key(state):
-                
-                bestValue = -999999
-                actions = self.qValues[state]
-                for action in actions:
-                    if self.getQValue(state, action) > bestValue:
-                        bestValue = self.getQValue(state, action)
-                        bestAction = action
-                    elif self.getQValue(state, action) == bestValue:
-                        bestAction = random.choice([action, bestAction])
-        
-            else:
-                actions = self.getLegalActions(state)
-                bestAction = random.choice(actions)
+            for action in actions:
+                #if self.qValues.has_key((state,action)):
+                if self.getQValue(state, action) > bestValue:
+                    bestValue = self.getQValue(state, action)
+                    bestAction = action
+                elif self.getQValue(state, action) == bestValue:
+                    bestAction = random.choice([action, bestAction])
         
         return bestAction
         
@@ -125,11 +116,12 @@ class QLearningAgent(ReinforcementAgent):
         legalActions = self.getLegalActions(state)
         action = None
         
-        if util.flipCoin(self.epsilon):
-            #take random action
-            action = random.choice(legalActions)
-        else:
-            action = self.computeActionFromQValues(state)
+        if(len(legalActions)):
+            if util.flipCoin(self.epsilon):
+                #take random action
+                action = random.choice(legalActions)
+            else:
+                action = self.computeActionFromQValues(state)
 
         return action
 
@@ -143,23 +135,17 @@ class QLearningAgent(ReinforcementAgent):
           it will be called on your behalf
         """
         
-        legalActions = self.getLegalActions(state)
+        #for action in self.getLegalActions(state):
+        #    if (not self.qValues.has_key((state,action))):
+        #        self.qValues[(state,action)] = 0.0
+            
+        actionValue = (self.alpha*(reward + self.discount * self.computeValueFromQValues(nextState))) \
+                      + (1-self.alpha) * self.getQValue(state, action) 
         
-        if (not self.qValues.has_key(state)):
-            #visited a new state
-            actionValues = {}
-            for legalAction in legalActions:
-                actionValues[legalAction] = 0.0
-            
-            actionValues[action] = (self.alpha*(reward + self.discount * self.computeValueFromQValues(nextState))) \
-                                   + (1-self.alpha) * self.getQValue(state, action) 
-            self.qValues[state] = actionValues
-            
-        else:
-            actionValues = self.qValues[state]
-            actionValues[action] = (self.alpha*(reward + self.discount * self.computeValueFromQValues(nextState))) \
-                                   + (1-self.alpha) * self.getQValue(state, action)
-           
+        #actionValue = self.getQValue(state, action) + self.alpha * (reward + self.discount * self.getValue(nextState))
+
+        self.qValues[(state,action)] = actionValue
+
 
     def getPolicy(self, state):
         return self.computeActionFromQValues(state)
@@ -224,13 +210,20 @@ class ApproximateQAgent(PacmanQAgent):
         
         qValue = 0.0
         
-        features = self.featExtractor.getFeatures(state,action)
-        
-        for key in features.keys():
-            qValue += (self.weights[key] * features[key])
+        features = self.featExtractor.getFeatures(state,action)   
 
-        #for feature in features:
-        #    qValue += self.weights[feature]*features[feature]
+        #for key in features.keys():
+        #    qValue += (self.weights[key] * features[key])
+
+        for feature in features:
+            qValue = qValue + (self.weights[feature]*features[feature])
+
+        '''    
+        print features
+        print feature
+        print features[feature]
+        print "ASIFNQFOQNFQ"
+        '''
 
         return qValue
 
@@ -244,43 +237,72 @@ class ApproximateQAgent(PacmanQAgent):
         legalActions = self.getLegalActions(state)
         
         
-        #print "reward: ",reward
-        #print "alpha; ",self.alpha
-        #print "discount: ",self.discount
-        #print "features are: ",features
-        #print "qVal next : ",self.getValue(nextState)
-        #print "qVal : ",self.getQValue(state,action)
-        
+        '''
+        print "reward: ",reward
+        print "alpha; ",self.alpha
+        print "discount: ",self.discount
+        print "features are: ",features
+        print "qVal next : ",self.getValue(nextState)
+        print "qVal : ",self.getQValue(state,action)
+        '''
+
         #-10 + 0.9 * 0 - 0
         #0.1 * -10 * 0.9 = -0.9
 
-        if (not (self.qValues.has_key(state))):
+        #if (not (self.qValues.has_key(state))):
             
-            for legalAction in legalActions:
-                actionValues[legalAction] = 0.0
+        #    for legalAction in legalActions:
+        #        actionValues[legalAction] = 0.0
 
-            actionValues[action] = self.getQValue(state,action)
-            self.qValues[state] = actionValues
+        #    actionValues[action] = self.getQValue(state,action)
+        #    self.qValues[state] = actionValues
 
-        else:
-            actionValues = self.qValues[state]
-            actionValues[action] = self.getQValue(state,action)
+        #else:
+        #    actionValues = self.qValues[state]
+        #    actionValues[action] = self.getQValue(state,action)
 
+        difference = 0
+        
+        weightsCp = self.weights.copy()
         
         for key in features.keys():
-            self.weights[key] += self.alpha * (reward + self.discount * self.getValue(nextState) - self.getQValue(state,action)) * features[key]
-            #difference = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state,action)
-            #self.weights[key] += (self.alpha * difference * features[key])
             
+            '''
             if len(features) > 1:
+                print "ughh"
                 print self.weights[key]
                 print key
                 print features[key]
+                print self.getQValue(state,action)
+            '''
 
-        if len(features) > 1:
+            #self.weights[key] += self.alpha * (reward + self.discount * self.getValue(nextState) - self.getQValue(state,action)) * features[key]
+            difference = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state,action)
+            #difference = (self.alpha*(reward + self.discount * self.computeValueFromQValues(nextState))) \
+            #          + (1-self.alpha) * self.getQValue(state, action) 
+        
+
+            weightsCp[key] = self.weights[key] + self.alpha*(difference * features[key])
             
-            print self.weights
+            #print "key"
+            #print "difference"
 
+ 
+            #print "key"
+            #print "difference"
+
+            #if len(features) > 1:
+            #    print difference
+
+        self.weights = weightsCp
+
+        #if len(features) > 1:
+            
+        #    print self.weights
+            #print features
+            #for key in features:
+            #    print key
+            #    print features[key]
             
 
  
