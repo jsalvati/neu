@@ -134,16 +134,10 @@ class QLearningAgent(ReinforcementAgent):
           NOTE: You should never call this function,
           it will be called on your behalf
         """
-        
-        #for action in self.getLegalActions(state):
-        #    if (not self.qValues.has_key((state,action))):
-        #        self.qValues[(state,action)] = 0.0
-            
+  
         actionValue = (self.alpha*(reward + self.discount * self.computeValueFromQValues(nextState))) \
                       + (1-self.alpha) * self.getQValue(state, action) 
         
-        #actionValue = self.getQValue(state, action) + self.alpha * (reward + self.discount * self.getValue(nextState))
-
         self.qValues[(state,action)] = actionValue
 
 
@@ -211,19 +205,8 @@ class ApproximateQAgent(PacmanQAgent):
         qValue = 0.0
         
         features = self.featExtractor.getFeatures(state,action)   
-
-        #for key in features.keys():
-        #    qValue += (self.weights[key] * features[key])
-
         for feature in features:
             qValue = qValue + (self.weights[feature]*features[feature])
-
-        '''    
-        print features
-        print feature
-        print features[feature]
-        print "ASIFNQFOQNFQ"
-        '''
 
         return qValue
 
@@ -233,78 +216,15 @@ class ApproximateQAgent(PacmanQAgent):
         """
         
         features = self.featExtractor.getFeatures(state,action)
-        actionValues = {}
-        legalActions = self.getLegalActions(state)
-        
-        
-        '''
-        print "reward: ",reward
-        print "alpha; ",self.alpha
-        print "discount: ",self.discount
-        print "features are: ",features
-        print "qVal next : ",self.getValue(nextState)
-        print "qVal : ",self.getQValue(state,action)
-        '''
-
-        #-10 + 0.9 * 0 - 0
-        #0.1 * -10 * 0.9 = -0.9
-
-        #if (not (self.qValues.has_key(state))):
-            
-        #    for legalAction in legalActions:
-        #        actionValues[legalAction] = 0.0
-
-        #    actionValues[action] = self.getQValue(state,action)
-        #    self.qValues[state] = actionValues
-
-        #else:
-        #    actionValues = self.qValues[state]
-        #    actionValues[action] = self.getQValue(state,action)
-
         difference = 0
-        
         weightsCp = self.weights.copy()
         
-        for key in features.keys():
-            
-            '''
-            if len(features) > 1:
-                print "ughh"
-                print self.weights[key]
-                print key
-                print features[key]
-                print self.getQValue(state,action)
-            '''
+        for feature in features:
 
-            #self.weights[key] += self.alpha * (reward + self.discount * self.getValue(nextState) - self.getQValue(state,action)) * features[key]
             difference = (reward + self.discount * self.getValue(nextState)) - self.getQValue(state,action)
-            #difference = (self.alpha*(reward + self.discount * self.computeValueFromQValues(nextState))) \
-            #          + (1-self.alpha) * self.getQValue(state, action) 
-        
-
-            weightsCp[key] = self.weights[key] + self.alpha*(difference * features[key])
-            
-            #print "key"
-            #print "difference"
-
- 
-            #print "key"
-            #print "difference"
-
-            #if len(features) > 1:
-            #    print difference
+            weightsCp[feature] = self.weights[feature] + self.alpha*(difference * features[feature])
 
         self.weights = weightsCp
-
-        #if len(features) > 1:
-            
-        #    print self.weights
-            #print features
-            #for key in features:
-            #    print key
-            #    print features[key]
-            
-
  
         
         
