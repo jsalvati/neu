@@ -390,21 +390,24 @@ class ParticleFilter(InferenceModule):
         a belief distribution.
         """
 
-        
-        
-        #for every particle
+        #for every possible position the ghost could have been at...
 
-        for particle in self.particles:
+        for i in range(len(self.particles)):
+            particle = self.particles.pop(0)
+            allPossible = util.Counter()
+
             #calculate the new distribution
-            newPositionDist = self.getPositionDistribution(self.setGhostPosition(gameState,oldGhostPos))
+            newPositionDist = self.getPositionDistribution(self.setGhostPosition(gameState,particle))
             
             for newPos, prob in newPositionDist.items():
-                #p(t+1) = SUM p(t)*p(t+1|t)
-                allPossible[newPos] = allPossible[newPos] + self.beliefs[oldGhostPos] * prob
+                allPossible[newPos] = prob
+            
+            newParticle = util.sample(allPossible)
+            self.particles.append(newParticle)
         
-
-
-        self.beliefs = allPossible
+        
+      
+        
 
     def getBeliefDistribution(self):
         """
